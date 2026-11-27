@@ -74,7 +74,9 @@ l'a scellé, si chaque partie est intacte, et si la chaîne est complète.
 spec/            le socle, les cachets, la confiance ; spec/schema/ leurs schémas JSON
 formats/hr/      le format .hr : sa spécification, ses schémas, son vocabulaire, ses exemples
 formats/_template/  le point de départ d'un nouveau format
-registry/        les formats, les schémas d'identifiants
+registry/        les formats, les schémas d'identifiants, les préfixes d'extension, les mises en œuvre
+process/         la méthode
+proposals/       les propositions
 impl/js/         la mise en œuvre de référence et ses tests
 ```
 
@@ -82,9 +84,21 @@ impl/js/         la mise en œuvre de référence et ses tests
 
 Un nouveau format part de [formats/_template/](formats/_template/README.md) :
 un identifiant, une extension, les parties qu'il définit avec leurs schémas, un
-vocabulaire, des fichiers d'exemple scellés, et les tests qui les jugent. La
-méthode complète de proposition, de revue et d'adoption est le prochain document
-à écrire ; d'ici là, une proposition s'ouvre comme une discussion sur le dépôt.
+vocabulaire, des fichiers d'exemple scellés, et les tests qui les jugent.
+
+Il suit [la méthode](process/README.md) : une discussion, une proposition, une
+revue publique, une décision écrite. Un format devient stable quand **deux
+mises en œuvre indépendantes**, de deux organisations, se lisent l'une l'autre.
+
+## Participer
+
+| | |
+| --- | --- |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | Par où commencer, et les règles d'une demande de fusion |
+| [process/README.md](process/README.md) | La méthode : sortes de changement, propositions, états d'un format, extensions |
+| [GOVERNANCE.md](GOVERNANCE.md) | Les rôles, le comité, la période de démarrage |
+| [proposals/](proposals/README.md) | Les propositions, acceptées ou non |
+| [SECURITY.md](SECURITY.md) | Signaler un défaut de sécurité |
 
 ## Ce qui n'est pas encore là
 
@@ -94,7 +108,6 @@ méthode complète de proposition, de revue et d'adoption est le prochain docume
   [spec/trust.md](spec/trust.md), pas encore en service. D'ici là, une clé se
   remet directement ou se publie sur le domaine de son détenteur.
 - L'horodatage d'un cachet par un tiers.
-- La méthode de contribution et la gouvernance.
 
 ## Licences
 

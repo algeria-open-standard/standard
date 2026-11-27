@@ -1,0 +1,6 @@
+{
+  "about": "Les préfixes d’extension réservés par les éditeurs. Un éditeur écrit ses types de partie x-<préfixe>.<nom>, ses codes x-<préfixe>-<nom> et ses schémas d’identifiant x-<préfixe>:<nom>. Premier arrivé, premier servi ; un préfixe compte de deux à seize lettres minuscules ou chiffres.",
+  "vendors": [
+    { "prefix": "ojoor", "name": "Ojoor", "since": "2026-11-27" }
+  ]
+}

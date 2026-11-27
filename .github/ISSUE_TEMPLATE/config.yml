@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Défaut de sécurité
+    url: https://github.com/algeria-open-standard/standard/security/advisories/new
+    about: Un défaut de sécurité ne se signale pas en public.

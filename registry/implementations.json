@@ -1,0 +1,13 @@
+{
+  "about": "Les mises en œuvre qui jugent les fichiers d’exemple d’un format comme la mise en œuvre de référence. C’est cette liste qui dit si un format a ses deux mises en œuvre indépendantes.",
+  "implementations": [
+    {
+      "name": "aos-reference",
+      "organisation": "Algeria Open Standard",
+      "language": "JavaScript (Node)",
+      "source": "impl/js",
+      "formats": [{ "id": "hr", "version": "0.1", "reads": true, "writes": true }],
+      "examplesPassedOn": "2026-11-27"
+    }
+  ]
+}
