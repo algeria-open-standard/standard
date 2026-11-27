@@ -3,7 +3,7 @@ import { test } from 'node:test'
 
 import { append, open, verify, withhold } from '../src/container.mjs'
 import { checkHr, HR } from '../src/hr.mjs'
-import { checkSeal, digest, generateKey, keyId, publicJwk, seal } from '../src/seal.mjs'
+import { checkProof, checkSeal, digest, generateKey, keyId, prove, publicJwk, seal } from '../src/seal.mjs'
 import { readZip, writeZip } from '../src/zip.mjs'
 
 const json = (v) => Buffer.from(JSON.stringify(v), 'utf8')
@@ -162,6 +162,24 @@ test('a seal names its algorithm and its key, and neither can be swapped', () =>
   assert.match(checkSeal(payload, header((h) => ({ ...h, typ: 'JWT' }))).why, /is not aos-seal\+jws/)
   // an unchanged header with a changed signature
   assert.equal(checkSeal(payload, { ...good, signature: seal(Buffer.from('x'), keyA).signature }).valid, false)
+})
+
+test('a proof of possession answers one challenge, with one key, and nothing else', () => {
+  const challenge = 'aos-directory-proof:v1:annuaire.example:12:' + keyId(keyA) + ':bm9uY2U:2027-01-10T09:30:00Z'
+  for (const key of [keyA, keyB]) {
+    const c = challenge.replace(keyId(keyA), keyId(key))
+    const proof = prove(c, key)
+    assert.equal(proof.split('.').length, 3)
+    assert.deepEqual(checkProof(proof, publicJwk(key), c), { valid: true })
+    assert.match(checkProof(proof, publicJwk(key), c + 'x').why, /not over this challenge/)
+  }
+  // the proof of another key, a seal passed off as a proof, a signature changed
+  assert.match(checkProof(prove(challenge, keyB), publicJwk(keyA), challenge).why, /not the one of the deposited key/)
+  assert.match(checkProof(prove(challenge, generateKey()), publicJwk(keyA), challenge).why, /names another key/)
+  const s = seal(Buffer.from(challenge), keyA)
+  assert.match(checkProof(s.protected + '.' + Buffer.from(challenge).toString('base64url') + '.' + s.signature, publicJwk(keyA), challenge).why, /is not aos-proof\+jws/)
+  const proof = prove(challenge, keyA)
+  assert.equal(checkProof(proof.slice(0, -4) + 'AAAA', publicJwk(keyA), challenge).valid, false)
 })
 
 test('a .hr file is about one person: a segment about someone else is refused', () => {

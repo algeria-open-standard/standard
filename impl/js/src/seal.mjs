@@ -12,6 +12,7 @@ import { createHash, createPrivateKey, createPublicKey, generateKeyPairSync, sig
 
 export const ALGORITHMS = ['EdDSA', 'ES256']
 export const SEAL_TYPE = 'aos-seal+jws'
+export const PROOF_TYPE = 'aos-proof+jws'
 
 const b64u = (bytes) => Buffer.from(bytes).toString('base64url')
 const unb64u = (text) => Buffer.from(text, 'base64url')
@@ -92,4 +93,39 @@ export function checkSeal(payload, entry) {
   const signature = unb64u(entry.signature ?? '')
   const ok = header.alg === 'EdDSA' ? verify(null, input, key, signature) : signature.length === 64 && verify('sha256', input, { key, dsaEncoding: 'ieee-p1363' }, signature)
   return ok ? { ...out, valid: true } : { ...out, valid: false, why: 'the signature does not match the header of the segment' }
+}
+
+/**
+ * Proves to a key directory that the holder of a public key holds its private
+ * key: a JWS in compact serialization over the challenge the directory gave
+ * (spec/trust.md, 5.2). The private key signs here and goes nowhere.
+ */
+export function prove(challenge, privateJwk) {
+  const alg = algorithmOf(privateJwk)
+  const protectedHeader = b64u(JSON.stringify({ alg, typ: PROOF_TYPE, kid: keyId(privateJwk) }))
+  const input = Buffer.from(protectedHeader + '.' + b64u(Buffer.from(challenge, 'utf8')), 'ascii')
+  const key = createPrivateKey({ key: privateJwk, format: 'jwk' })
+  const signature = alg === 'EdDSA' ? sign(null, input, key) : sign('sha256', input, { key, dsaEncoding: 'ieee-p1363' })
+  return input.toString('ascii') + '.' + b64u(signature)
+}
+
+/** What a directory checks of a proof: the header, that the payload is its own challenge, then the signature with the deposited key. */
+export function checkProof(proof, publicKey, challenge) {
+  const parts = String(proof).trim().split('.')
+  if (parts.length !== 3) return { valid: false, why: 'a proof has three parts separated by dots' }
+  let header
+  try {
+    header = JSON.parse(unb64u(parts[0]).toString('utf8'))
+  } catch {
+    return { valid: false, why: 'the header is not JSON' }
+  }
+  if (header.typ !== PROOF_TYPE) return { valid: false, why: 'type ' + JSON.stringify(header.typ) + ' is not ' + PROOF_TYPE }
+  if (!ALGORITHMS.includes(header.alg) || header.alg !== algorithmOf(publicKey)) return { valid: false, why: 'the algorithm is not the one of the deposited key' }
+  if (header.kid !== keyId(publicKey)) return { valid: false, why: 'the proof names another key' }
+  if (unb64u(parts[1]).toString('utf8') !== challenge) return { valid: false, why: 'the proof is not over this challenge' }
+  const input = Buffer.from(parts[0] + '.' + parts[1], 'ascii')
+  const key = createPublicKey({ key: publicJwk(publicKey), format: 'jwk' })
+  const signature = unb64u(parts[2])
+  const ok = header.alg === 'EdDSA' ? verify(null, input, key, signature) : signature.length === 64 && verify('sha256', input, { key, dsaEncoding: 'ieee-p1363' }, signature)
+  return ok ? { valid: true } : { valid: false, why: 'the signature does not match' }
 }

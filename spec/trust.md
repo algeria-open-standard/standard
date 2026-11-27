@@ -189,7 +189,19 @@ les serveurs de cette entreprise sont arrêtés, même si elle a fermé.**
 3. L'entreprise crée sa paire de clés chez elle et dépose la clé publique.
 4. Elle prouve qu'elle détient la clé privée correspondante en signant un défi
    que l'annuaire lui donne. Sans cette preuve, n'importe qui pourrait déposer
-   la clé d'un autre sous son propre nom.
+   la clé d'un autre sous son propre nom. Le défi est une ligne de texte qui
+   nomme l'annuaire, le compte, la clé, un aléa et une échéance :
+
+   ```
+   aos-directory-proof:v1:<hôte de l'annuaire>:<compte>:<kid>:<aléa>:<échéance>
+   ```
+
+   La preuve est un JWS en sérialisation compacte dont la charge utile est le
+   défi, et l'en-tête protégé `{ "alg", "typ": "aos-proof+jws", "kid" }`.
+   L'outil de référence la produit : `aos prove --key key.json --challenge "…"`.
+   Le type `aos-proof+jws` n'est pas celui d'un cachet : une preuve ne peut pas
+   être présentée comme le cachet d'un segment, ni l'inverse. Une clé de cachet
+   ne signe rien d'autre qu'un en-tête de segment ou un défi de cette forme.
 5. La clé est publiée avec son détenteur, le début de sa validité et le degré
    de validation du compte.
 

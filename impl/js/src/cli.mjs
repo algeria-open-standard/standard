@@ -8,6 +8,9 @@
 //            [--onto earlier.hr] [--trust trust.json] [--format hr] [--profile employee-file]
 //       seals the parts/ and files/ of a folder as a new segment, after the
 //       segments of an earlier file when one is given.
+//   aos prove --key key.json --challenge "<challenge>"
+//       answers the challenge of a key directory: proves that you hold the
+//       private key of the public key you deposited. Prints the proof to paste.
 //   aos verify file.hr [--trust trust.json] [--json]
 //   aos withhold file.hr --drop 1:parts/payroll/2025.json [--drop …] --out public.hr
 //       gives a copy without some parts; the seals stay valid.
@@ -16,7 +19,7 @@ import path from 'node:path'
 
 import { append, verify, withhold } from './container.mjs'
 import { checkHr, HR } from './hr.mjs'
-import { generateKey, keyId, publicJwk } from './seal.mjs'
+import { generateKey, keyId, prove, publicJwk } from './seal.mjs'
 
 function options(argv) {
   const opts = { _: [], drop: [] }
@@ -60,6 +63,12 @@ const commands = {
     const pub = opts.out.replace(/\.json$/, '') + '.pub.json'
     writeFileSync(pub, JSON.stringify({ kid: keyId(key), jwk: publicJwk(key) }, null, 2) + '\n')
     console.log(`private key: ${opts.out} (keep it; it never leaves you)\npublic key:  ${pub}\nkey id:      ${keyId(key)}`)
+  },
+
+  prove(opts) {
+    if (typeof opts.key !== 'string' || typeof opts.challenge !== 'string') throw new Error('usage: aos prove --key key.json --challenge "<the challenge the directory gave>"')
+    if (!opts.challenge.startsWith('aos-directory-proof:')) throw new Error('this is not a challenge of a key directory: sign nothing else with your seal key')
+    console.log(prove(opts.challenge, json(opts.key)))
   },
 
   seal(opts) {
@@ -119,7 +128,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === path.resolve(new URL(im
   const opts = options(process.argv.slice(2))
   const command = commands[opts._[0]]
   if (!command) {
-    console.log('usage: aos keygen | seal | verify | withhold   (see the head of src/cli.mjs)')
+    console.log('usage: aos keygen | prove | seal | verify | withhold   (see the head of src/cli.mjs)')
     process.exit(opts._[0] ? 1 : 0)
   }
   try {
