@@ -10,6 +10,8 @@
 // held in hardware and for X.509 certificates.
 import { createHash, createPrivateKey, createPublicKey, generateKeyPairSync, sign, verify } from 'node:crypto'
 
+import { readJson } from './json.mjs'
+
 export const ALGORITHMS = ['EdDSA', 'ES256']
 export const SEAL_TYPE = 'aos-seal+jws'
 export const PROOF_TYPE = 'aos-proof+jws'
@@ -69,13 +71,13 @@ export function seal(payload, privateJwk, { kind = 'seal', role = 'issuer', x5c 
  * key is another question (trust.mjs).
  */
 export function checkSeal(payload, entry) {
-  let header
-  try {
-    header = JSON.parse(unb64u(entry.protected).toString('utf8'))
-  } catch {
-    return { valid: false, why: 'the protected header is not JSON' }
-  }
-  const out = { keyId: header.kid, algorithm: header.alg, kind: header.aosKind ?? 'seal', role: header.aosRole ?? 'issuer', jwk: header.jwk, x5c: header.x5c }
+  const read = readJson(unb64u(entry.protected ?? '').toString('utf8'))
+  if (read.problem || read.value === null || typeof read.value !== 'object') return { valid: false, why: `the protected header is not readable: ${read.problem ?? 'not an object'}` }
+  const header = read.value
+  const out = { keyId: header.kid, algorithm: header.alg, kind: header.aosKind, role: header.aosRole, jwk: header.jwk, x5c: header.x5c }
+  // a seal says what it is and in what capacity: nothing is assumed for it
+  if (header.aosKind !== 'seal' && header.aosKind !== 'signature') return { ...out, valid: false, why: '"aosKind" must be "seal" or "signature"' }
+  if (typeof header.aosRole !== 'string' || header.aosRole === '') return { ...out, valid: false, why: '"aosRole" is missing' }
   if (header.typ !== SEAL_TYPE) return { ...out, valid: false, why: `type ${JSON.stringify(header.typ)} is not ${SEAL_TYPE}` }
   // the algorithm is taken from a fixed list and must be the one of the key: never "none", never chosen by the key alone
   if (!ALGORITHMS.includes(header.alg)) return { ...out, valid: false, why: `algorithm ${JSON.stringify(header.alg)} is not allowed` }

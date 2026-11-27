@@ -104,6 +104,8 @@ export function readZip(bytes, limits = LIMITS) {
     if (flags & 0x0001) fail(`${name}: encrypted entries are not allowed`)
     if (flags & 0x0008) fail(`${name}: entries with a data descriptor are not allowed`)
     if (method !== 0 && method !== 8) fail(`${name}: compression method ${method} is not allowed`)
+    // the kind of file must be readable at a fixed place, without unpacking anything
+    if (name === 'mimetype' && (method !== 0 || extraLen !== 0)) fail('mimetype must be stored uncompressed, without extra field')
     if (!safePath(name)) fail(`unsafe path: ${JSON.stringify(name)}`)
     if (files.has(name)) fail(`duplicate entry: ${name}`)
     if (size > limits.entrySize) fail(`${name}: larger than ${limits.entrySize} bytes`)
@@ -114,6 +116,7 @@ export function readZip(bytes, limits = LIMITS) {
     const localName = bytes.subarray(local + 30, local + 30 + bytes.readUInt16LE(local + 26)).toString('utf8')
     if (localName !== name) fail(`${name}: named ${JSON.stringify(localName)} in its own header`)
     if (bytes.readUInt16LE(local + 8) !== method || bytes.readUInt32LE(local + 18) !== packed || bytes.readUInt32LE(local + 22) !== size) fail(`${name}: its two headers disagree`)
+    if (name === 'mimetype' && bytes.readUInt16LE(local + 28) !== 0) fail('mimetype must be stored uncompressed, without extra field')
     const start = local + 30 + bytes.readUInt16LE(local + 26) + bytes.readUInt16LE(local + 28)
     if (start + packed > dirAt) fail(`${name}: runs past the central directory`)
     expected = start + packed

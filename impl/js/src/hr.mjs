@@ -5,7 +5,8 @@ import { open, readHeader } from './container.mjs'
 export const HR = { id: 'hr', version: '0.1', profile: 'employee-file' }
 export const REQUIRED = ['hr.identity', 'hr.employment']
 
-const squash = (v) => String(v ?? '').normalize('NFKD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '')
+// letters and digits of any script, without accents or marks, without case: a name in Arabic stays a name
+const squash = (v) => String(v ?? '').normalize('NFKD').replace(/\p{M}+/gu, '').toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '')
 
 /** What identifies the person of an identity part: the national number when there is one, the name and the date of birth otherwise. */
 export function subjectKeys(identity) {

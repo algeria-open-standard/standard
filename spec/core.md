@@ -46,9 +46,13 @@ Un fichier AOS est une archive ZIP.
    descripteurs de données et les commentaires d'archive NE DOIVENT PAS être
    utilisés. Rien NE DOIT se trouver entre deux entrées ni après la fin de
    l'archive.
-7. Un lecteur DOIT refuser une archive qui enfreint une de ces règles, et DOIT
-   borner ce qu'il décompresse. Les bornes de la mise en œuvre de référence sont
-   10 000 entrées, 64 Mio par entrée et 512 Mio en tout.
+7. Une archive compte au plus 10 000 entrées ; une entrée fait au plus 64 Mio
+   une fois décompressée, et l'ensemble au plus 512 Mio. Un émetteur DOIT
+   rester sous ces bornes.
+8. Un lecteur DOIT refuser une archive qui enfreint une de ces règles, y
+   compris une entrée `mimetype` compressée ou munie d'un champ supplémentaire.
+   Les bornes sont les mêmes pour tous : un fichier ne doit pas être valide
+   chez l'un et refusé chez l'autre.
 
 Ces règles sont strictes à dessein : un fichier reçu d'un tiers est hostile tant
 qu'il n'est pas prouvé sain, et deux lecteurs qui ne comprennent pas une archive
@@ -74,7 +78,7 @@ segments/0001/files/…         les documents joints (PDF, images)
 | `format` | `id`, `version`, et `profile` s'il y en a un |
 | `sequence` | Le rang du segment, égal au nombre de son dossier |
 | `id` | Un identifiant unique du segment, `urn:uuid:…` tiré au hasard |
-| `createdAt` | La date et l'heure de l'émission, en UTC (RFC 3339), telles que l'émetteur les déclare |
+| `createdAt` | La date et l'heure de l'émission telles que l'émetteur les déclare, en UTC, de la forme `2026-06-30T15:00:00Z` (RFC 3339, toujours avec `Z`, fractions de seconde permises) |
 | `issuer` | L'émetteur : `name`, `country` (ISO 3166-1 alpha-2), `identifiers` |
 | `producer` | Le logiciel qui a écrit le segment (facultatif) |
 | `previous` | `null` pour un premier segment ; sinon le rang et l'empreinte de l'en-tête du segment précédent |
@@ -82,6 +86,15 @@ segments/0001/files/…         les documents joints (PDF, images)
 
 Un identifiant s'écrit `{ "scheme": "dz:nif", "value": "…" }`. Les schémas
 communs sont dans [registry/identifier-schemes.json](../registry/identifier-schemes.json).
+Deux identifiants désignent le même numéro quand leurs schémas sont égaux et
+que leurs valeurs le sont, espaces et casse mis à part.
+
+**Lire le JSON.** Les noms de membres sont exacts, casse comprise : `Issuer`
+n'est pas `issuer`. Un objet NE DOIT PAS porter deux fois le même nom de
+membre, et un lecteur DOIT refuser un en-tête, un fichier de cachets ou un
+en-tête protégé de cachet où cela arrive. Sans cette règle, un lecteur
+montrerait la première valeur et un autre la dernière, sous le même cachet
+valide. Une date qui n'a pas exactement la forme dite est refusée de même.
 
 ### 3.2 Les octets font foi
 
@@ -138,6 +151,9 @@ Il ne répond pas de l'exactitude de ce que les autres ont écrit. Il PEUT noter
 dans `previous.seals` ce qu'il a constaté des cachets du segment précédent le
 jour où il a ajouté le sien : c'est une trace utile le jour où une clé ancienne
 n'est plus vérifiable.
+
+Les segments présents dans un fichier DOIVENT se suivre sans trou. Seul le
+début peut manquer : un segment absent au milieu rompt la chaîne.
 
 Le vérificateur dit de la chaîne qu'elle est :
 

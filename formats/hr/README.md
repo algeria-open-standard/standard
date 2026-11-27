@@ -39,8 +39,8 @@ a travaillé chez lui.
 | `hr.documents` | `parts/documents.json` | non | Ce que sont les documents joints | [documents](schema/documents.schema.json) |
 | `file` | `files/…` | non | Un document joint : PDF, image | |
 
-Chaque partie JSON porte son propre `type` et sa `version`, égaux à ceux que
-l'en-tête du segment déclare pour elle.
+Chaque partie JSON porte son `type`, égal à celui que l'en-tête du segment
+déclare pour elle, et sa propre `version`.
 
 Les bulletins sont rangés par année, une partie par année, pour que la personne
 puisse en donner certaines et en retenir d'autres.
@@ -61,6 +61,10 @@ L'employeur tel qu'il était pendant la période (dénomination, forme, numéros
 le matricule, la date d'entrée, la date de sortie (`null` tant que la personne
 est en poste), les contrats successifs et les postes occupés avec leurs
 périodes.
+
+La fin d'un contrat (`to`) est la date à laquelle il a pris fin, ou son terme
+convenu s'il est à durée déterminée et encore en cours ; `null` pour un contrat
+à durée indéterminée en cours.
 
 Ces quatre mentions (entrée, sortie, postes, périodes) sont celles du certificat
 de travail que la loi fait délivrer à la fin de la relation de travail (loi
@@ -95,6 +99,10 @@ partie (`currency`, ISO 4217).
 Le droit, la consommation et le solde du congé annuel payé à une date, avec la
 période de référence.
 
+À préciser en 0.2 : `entitledDays` est-il le droit de la période de référence
+ou le droit cumulé à la date ? La version 0.1 ne le dit pas, et deux logiciels
+peuvent l'entendre différemment : seul `balanceDays` se lit sans ambiguïté.
+
 ### 2.5 `hr.documents` et les fichiers joints
 
 Un document joint est un fichier de `files/`, listé dans l'en-tête du segment
@@ -124,7 +132,10 @@ En plus de la vérification du socle, un vérificateur de `.hr` DOIT contrôler 
    et une partie `hr.employment`.
 2. **Une seule personne.** Deux segments parlent de la même personne s'ils
    donnent le même `dz:nin` quand tous deux en donnent un ; à défaut, le même
-   nom, les mêmes prénoms et la même date de naissance. Un segment qui parle de
+   nom, les mêmes prénoms et la même date de naissance. Les noms se comparent
+   par leurs lettres et leurs chiffres, dans l'écriture où ils sont donnés,
+   sans accents ni signes diacritiques, sans casse, sans espaces ni
+   ponctuation (forme NFKD d'Unicode). Un segment qui parle de
    quelqu'un d'autre rend le fichier invalide.
 3. **L'identité retenue.** Si le porteur a retenu `hr.identity` d'un segment,
    le vérificateur le signale : il ne peut pas dire à qui ce segment se

@@ -12,6 +12,7 @@
 // header: its seal then covers its own data and the chain it received.
 import { randomUUID } from 'node:crypto'
 
+import { readJson, UTC } from './json.mjs'
 import { checkSeal, digest, seal } from './seal.mjs'
 import { resolve } from './trust.mjs'
 import { ContainerError, readZip, safePath, writeZip } from './zip.mjs'
@@ -47,19 +48,17 @@ export function open(bytes) {
 export function readHeader(segment) {
   const bytes = segment.files.get('segment.json')
   if (!bytes) return { problems: ['segment.json is missing'] }
-  let header
-  try {
-    header = JSON.parse(bytes.toString('utf8'))
-  } catch {
-    return { bytes, problems: ['segment.json is not JSON'] }
-  }
+  const read = readJson(bytes.toString('utf8'))
+  if (read.problem) return { bytes, problems: [`segment.json: ${read.problem}`] }
+  const header = read.value
+  if (header === null || typeof header !== 'object' || Array.isArray(header)) return { bytes, problems: ['segment.json is not an object'] }
   const problems = []
   const need = (ok, what) => ok || problems.push(what)
   need(header.aos === AOS_VERSION, `"aos" must be "${AOS_VERSION}"`)
   need(typeof header.format?.id === 'string' && typeof header.format?.version === 'string', '"format" must give an id and a version')
   need(header.sequence === segment.sequence, `"sequence" must be ${segment.sequence}, the number of its folder`)
   need(typeof header.id === 'string' && header.id.length > 0, '"id" is missing')
-  need(typeof header.createdAt === 'string' && !Number.isNaN(Date.parse(header.createdAt)), '"createdAt" must be a date and time')
+  need(typeof header.createdAt === 'string' && UTC.test(header.createdAt), '"createdAt" must be a date and time in UTC, like 2026-06-30T15:00:00Z')
   need(typeof header.issuer?.name === 'string' && Array.isArray(header.issuer?.identifiers), '"issuer" must give a name and identifiers')
   need(header.previous === null || (Number.isInteger(header.previous?.sequence) && DIGEST.test(header.previous?.digest ?? '')), '"previous" must be null or name a sequence and a digest')
   const seen = new Set()
@@ -121,12 +120,8 @@ export function append(bytes, { format, issuer, producer, parts, keys, trust, cr
 }
 
 function sealsOf(segment) {
-  try {
-    const list = JSON.parse(segment.files.get('seals.json')?.toString('utf8') ?? '{}').signatures
-    return Array.isArray(list) ? list : []
-  } catch {
-    return []
-  }
+  const list = readJson(segment.files.get('seals.json')?.toString('utf8') ?? '{}').value?.signatures
+  return Array.isArray(list) ? list : []
 }
 
 /**

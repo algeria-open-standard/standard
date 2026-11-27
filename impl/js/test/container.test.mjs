@@ -3,6 +3,7 @@ import { test } from 'node:test'
 
 import { append, open, verify, withhold } from '../src/container.mjs'
 import { checkHr, HR } from '../src/hr.mjs'
+import { repeatedMember } from '../src/json.mjs'
 import { checkProof, checkSeal, digest, generateKey, keyId, prove, publicJwk, seal } from '../src/seal.mjs'
 import { readZip, writeZip } from '../src/zip.mjs'
 
@@ -180,6 +181,56 @@ test('a proof of possession answers one challenge, with one key, and nothing els
   assert.match(checkProof(s.protected + '.' + Buffer.from(challenge).toString('base64url') + '.' + s.signature, publicJwk(keyA), challenge).why, /is not aos-proof\+jws/)
   const proof = prove(challenge, keyA)
   assert.equal(checkProof(proof.slice(0, -4) + 'AAAA', publicJwk(keyA), challenge).valid, false)
+})
+
+/** The first segment with its header rewritten and sealed again by its issuer: a header that is wrong, under a valid seal. */
+function resealed(change) {
+  return tamper(first(), (files) => {
+    const header = change(files.get('segments/0001/segment.json').toString('utf8'))
+    files.set('segments/0001/segment.json', Buffer.from(header))
+    files.set('segments/0001/seals.json', json({ signatures: [seal(Buffer.from(header), keyA)] }))
+  })
+}
+
+test('a header is read exactly: a repeated member or a loose date is refused, even under a valid seal', () => {
+  // two "issuer" members: one reader would show the first, another the last
+  const twice = resealed((text) => text.replace('"issuer":', '"issuer": { "name": "SARL Autre", "country": "DZ", "identifiers": [] },\n  "issuer":'))
+  const report = verify(twice, { trust })
+  assert.equal(report.valid, false)
+  assert.match(report.findings[0].message, /the member "issuer" appears twice/)
+  // a date that a lenient parser would accept
+  for (const loose of ['2026-06-30', '2026-06-30T15:00:00+01:00', '30 June 2026 15:00 UTC', '2026-6-30T15:00:00Z']) {
+    const dated = resealed((text) => text.replace('2026-06-30T15:00:00Z', loose))
+    assert.match(verify(dated, { trust }).findings[0].message, /"createdAt" must be a date and time in UTC/, loose)
+  }
+  assert.equal(repeatedMember('{"a":{"b":1,"c":[{"b":2},{"b":3}]},"d":"\\"a\\":1"}'), null)
+  assert.equal(repeatedMember('{"a":1,"b":{"x":1,"x":2}}'), 'x')
+  assert.equal(repeatedMember('{"\\u0061":1,"a":2}'), 'a')
+})
+
+test('a seal says what it is: no kind or no role, no seal', () => {
+  const payload = Buffer.from('{"a":1}')
+  const good = seal(payload, keyA)
+  const header = (change) => ({ ...good, protected: Buffer.from(JSON.stringify(change(JSON.parse(Buffer.from(good.protected, 'base64url'))))).toString('base64url') })
+  assert.match(checkSeal(payload, header(({ aosKind, ...h }) => h)).why, /"aosKind" must be/)
+  assert.match(checkSeal(payload, header((h) => ({ ...h, aosKind: 'stamp' }))).why, /"aosKind" must be/)
+  assert.match(checkSeal(payload, header(({ aosRole, ...h }) => h)).why, /"aosRole" is missing/)
+  assert.match(checkSeal(payload, { ...good, protected: Buffer.from(Buffer.from(good.protected, 'base64url').toString().replace('{', '{"alg":"none",')).toString('base64url') }).why, /appears twice/)
+})
+
+test('an identifier is the same number whatever its spaces and its case', () => {
+  const spaced = { keys: [{ kid: keyId(keyA), holder: { ...A, identifiers: [{ scheme: 'dz:nif', value: ' 0000 0000 0000 001 ' }] }, source: 'direct' }] }
+  assert.equal(verify(first(), { trust: spaced }).origin, 'known')
+  const rc = { name: 'SARL Alpha', country: 'DZ', identifiers: [{ scheme: 'dz:rc', value: '16/00-0000001b23' }] }
+  const file = append(null, { format: HR, issuer: rc, parts: parts(rc), keys: [{ jwk: keyA, kind: 'seal', role: 'issuer' }] })
+  assert.equal(verify(file, { trust: { keys: [{ kid: keyId(keyA), holder: { ...rc, identifiers: [{ scheme: 'dz:rc', value: '16/00-0000001B23' }] }, source: 'direct' }] } }).origin, 'known')
+})
+
+test('two people with names in Arabic and the same date of birth are two people', () => {
+  const arabic = (family) => ({ type: 'hr.identity', version: '0.1', person: { familyName: family, givenNames: 'أمين', birth: { date: '1994-05-17' } } })
+  const one = append(null, { format: HR, issuer: A, parts: parts(A, arabic('بن علي')), keys: [{ jwk: keyA, kind: 'seal', role: 'issuer' }] })
+  assert.deepEqual(checkHr(append(one, { format: HR, issuer: B, parts: parts(B, arabic('بن علي')), keys: [{ jwk: keyB, kind: 'seal', role: 'issuer' }], trust })), [])
+  assert.deepEqual(checkHr(append(one, { format: HR, issuer: B, parts: parts(B, arabic('بوزيد')), keys: [{ jwk: keyB, kind: 'seal', role: 'issuer' }], trust })).map((f) => f.code), ['hr-subject'])
 })
 
 test('a .hr file is about one person: a segment about someone else is refused', () => {

@@ -93,9 +93,13 @@ confiance**, un fichier dont il répond :
 }
 ```
 
-Une clé est crue si elle appartient à l'émetteur que le segment nomme (un
-identifiant commun, aucun en conflit) et si la date du segment tombe dans sa
-validité, avant sa révocation.
+Une clé est crue si elle appartient à l'émetteur que le segment nomme et si la
+date du segment tombe dans sa validité, avant sa révocation. Elle appartient à
+l'émetteur quand le détenteur de la clé et l'émetteur du segment ont au moins
+un identifiant en commun et aucun en conflit. Deux identifiants sont en commun
+quand ils ont le même schéma et la même valeur, espaces et casse mis à part ;
+ils sont en conflit quand ils ont le même schéma et des valeurs différentes,
+même si un autre identifiant concorde.
 
 ### 2.2 T2, la publication sur un domaine
 

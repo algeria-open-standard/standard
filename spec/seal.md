@@ -77,7 +77,8 @@ Deux précisions, parce que la confusion est fréquente :
 | `aosRole` | `issuer` pour l'émetteur du segment |
 | `x5c` | Facultatif : la chaîne de certificats X.509, quand la clé est certifiée par un prestataire |
 
-Tout ce qui précède est couvert par le cachet. Le membre non protégé `header`
+Tous ces paramètres sont obligatoires, sauf `x5c`. Tout ce qui précède est
+couvert par le cachet. Le membre non protégé `header`
 est réservé aux preuves ajoutées après coup (`aosEvidence`, voir 6) : rien de ce
 qu'il contient n'est couvert, et un vérificateur NE DOIT PAS s'y fier pour
 décider de la validité du cachet.
@@ -106,8 +107,11 @@ un algorithme faiblira (voir 7).
 
 Pour chaque entrée de `signatures`, un vérificateur DOIT, dans cet ordre :
 
-1. décoder l'en-tête protégé ; refuser si ce n'est pas du JSON ;
-2. refuser si `typ` n'est pas `aos-seal+jws` ;
+1. décoder l'en-tête protégé ; refuser si ce n'est pas un objet JSON, ou s'il
+   porte deux fois le même membre ;
+2. refuser si `typ` n'est pas `aos-seal+jws`, si `aosKind` n'est ni `seal` ni
+   `signature`, ou si `aosRole` manque : rien n'est supposé à la place du
+   cachet ;
 3. refuser si `alg` n'est pas dans la liste de 3.2 ;
 4. refuser si l'en-tête porte `crit` ;
 5. refuser si `jwk` est absent ou porte une clé privée (`d`) ;

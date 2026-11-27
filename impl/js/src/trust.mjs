@@ -16,7 +16,9 @@ export const LEVELS = {
   certificate: 'T4', // the key is certified by an authorised trust service provider
 }
 
-const same = (a, b) => a.scheme === b.scheme && String(a.value).replace(/\s+/g, '') === String(b.value).replace(/\s+/g, '')
+// two identifiers are the same number when their schemes are equal and their values are, spaces and case set aside
+const bare = (v) => String(v).replace(/\s+/g, '').toUpperCase()
+const same = (a, b) => a.scheme === b.scheme && bare(a.value) === bare(b.value)
 
 /**
  * Looks a sealing key up in the trust store and checks it against the issuer

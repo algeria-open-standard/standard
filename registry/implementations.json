@@ -6,8 +6,31 @@
       "organisation": "Algeria Open Standard",
       "language": "JavaScript (Node)",
       "source": "impl/js",
-      "formats": [{ "id": "hr", "version": "0.1", "reads": true, "writes": true }],
+      "formats": [
+        {
+          "id": "hr",
+          "version": "0.1",
+          "reads": true,
+          "writes": true
+        }
+      ],
       "examplesPassedOn": "2026-11-27"
+    },
+    {
+      "name": "Ojoor",
+      "organisation": "Ojoor",
+      "language": "Go",
+      "source": "in the product, not published",
+      "formats": [
+        {
+          "id": "hr",
+          "version": "0.1",
+          "reads": true,
+          "writes": true
+        }
+      ],
+      "examplesPassedOn": "2026-11-27",
+      "note": "Reads the files of the reference implementation and is read by it. The two implementations have the same author: they do not count as two independent ones for the state stable."
     }
   ]
 }

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { crc32 } from 'node:zlib'
+import { crc32, deflateRawSync } from 'node:zlib'
 
 import { open } from '../src/container.mjs'
 import { ContainerError, readZip, safePath, writeZip } from '../src/zip.mjs'
@@ -9,7 +9,7 @@ const entry = (name, text) => ({ name, data: Buffer.from(text) })
 const good = () => writeZip([entry('mimetype', 'application/vnd.aos.hr+zip'), entry('segments/0001/segment.json', '{}'.repeat(400))])
 
 /** A raw archive written by hand, to give the reader what the writer refuses to make. */
-function raw(files, { flags = 0x0800, method = 0, comment = '' } = {}) {
+function raw(files, { flags = 0x0800, method = 0, comment = '', sizeOf = (data) => data.length, crcOf = (data) => crc32(data) } = {}) {
   const chunks = []
   const central = []
   let offset = 0
@@ -20,9 +20,9 @@ function raw(files, { flags = 0x0800, method = 0, comment = '' } = {}) {
     head.writeUInt16LE(20, 4)
     head.writeUInt16LE(flags, 6)
     head.writeUInt16LE(method, 8)
-    head.writeUInt32LE(crc32(data), 14)
+    head.writeUInt32LE(crcOf(data), 14)
     head.writeUInt32LE(data.length, 18)
-    head.writeUInt32LE(data.length, 22)
+    head.writeUInt32LE(sizeOf(data), 22)
     head.writeUInt16LE(n.length, 26)
     chunks.push(head, n, data)
     const dir = Buffer.alloc(46)
@@ -78,6 +78,11 @@ test('an entry that lies about its size, or does not match its checksum, is refu
   assert.throws(() => readZip(flipped), /checksum mismatch/)
   assert.throws(() => readZip(good(), { entries: 10, entrySize: 100, totalSize: 1000 }), /larger than 100 bytes/)
   assert.throws(() => readZip(good(), { entries: 1, entrySize: 1e6, totalSize: 1e6 }), /too many entries/)
+})
+
+test('the kind of file must be stored as it is: a compressed mimetype is refused', () => {
+  const type = Buffer.from('application/vnd.aos.hr+zip')
+  assert.throws(() => readZip(raw([['mimetype', deflateRawSync(type)]], { method: 8, sizeOf: () => type.length, crcOf: () => crc32(type) })), /mimetype must be stored/)
 })
 
 test('a file that is not an AOS file, or holds something outside its segments, is refused', () => {
