@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:aos:format:hr:0.1:documents",
+  "title": "hr.documents 0.1 : ce que sont les documents joints au segment",
+  "description": "Chaque document joint est un fichier de files/, listé dans l’en-tête du segment avec son empreinte. Cette partie dit ce qu’est chacun.",
+  "type": "object",
+  "required": ["type", "version", "documents"],
+  "additionalProperties": false,
+  "properties": {
+    "type": { "const": "hr.documents" },
+    "version": { "const": "0.1" },
+    "documents": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["kind", "title", "path"],
+        "additionalProperties": false,
+        "properties": {
+          "kind": { "enum": ["work-certificate", "employment-contract", "contract-amendment", "payslip", "diploma", "training-certificate", "other"] },
+          "title": { "type": "string", "minLength": 1 },
+          "path": { "type": "string", "pattern": "^files/.+$" },
+          "issuedOn": { "type": "string", "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$" },
+          "language": { "type": "string", "pattern": "^[a-z]{2}$" }
+        }
+      }
+    }
+  }
+}

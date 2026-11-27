@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:aos:format:hr:0.1:identity",
+  "title": "hr.identity 0.1 : la personne dont le dossier parle",
+  "type": "object",
+  "required": ["type", "version", "person"],
+  "additionalProperties": false,
+  "properties": {
+    "type": { "const": "hr.identity" },
+    "version": { "const": "0.1" },
+    "person": {
+      "type": "object",
+      "required": ["familyName", "givenNames", "birth"],
+      "additionalProperties": false,
+      "properties": {
+        "familyName": { "type": "string", "minLength": 1, "description": "Nom, en caractères latins, tel que sur la pièce d’identité" },
+        "givenNames": { "type": "string", "minLength": 1, "description": "Prénoms, en caractères latins" },
+        "familyNameAr": { "type": "string", "description": "Nom en arabe" },
+        "givenNamesAr": { "type": "string", "description": "Prénoms en arabe" },
+        "gender": { "enum": ["M", "F"] },
+        "birth": {
+          "type": "object",
+          "required": ["date"],
+          "additionalProperties": false,
+          "properties": {
+            "date": { "$ref": "#/$defs/date" },
+            "presumed": { "type": "boolean", "description": "Vrai quand l’état civil ne donne que l’année (naissance présumée) : le jour et le mois valent alors 01-01" },
+            "place": { "type": "string" },
+            "country": { "type": "string", "pattern": "^[A-Z]{2}$" }
+          }
+        },
+        "nationality": { "type": "string", "pattern": "^[A-Z]{2}$", "description": "ISO 3166-1 alpha-2" },
+        "identifiers": {
+          "type": "array",
+          "description": "Par exemple dz:nin (numéro d’identification national) et dz:nss (numéro de sécurité sociale). Voir registry/identifier-schemes.json.",
+          "items": { "$ref": "#/$defs/identifier" }
+        },
+        "contact": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": { "email": { "type": "string" }, "phone": { "type": "string" }, "address": { "type": "string" } }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "date": { "type": "string", "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$" },
+    "identifier": {
+      "type": "object",
+      "required": ["scheme", "value"],
+      "additionalProperties": false,
+      "properties": { "scheme": { "type": "string" }, "value": { "type": "string", "minLength": 1, "maxLength": 64 } }
+    }
+  }
+}

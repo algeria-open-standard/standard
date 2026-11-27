@@ -1,0 +1,6 @@
+node_modules/
+*.log
+.DS_Store
+# a private key never enters the repository: only the test keys of the examples do
+key.json
+*.key.json

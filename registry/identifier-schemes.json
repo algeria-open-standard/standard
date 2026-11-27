@@ -1,0 +1,13 @@
+{
+  "about": "Les schémas d’identifiants communs à tous les formats. Un identifiant s’écrit { scheme, value } : le schéma dit de quel numéro il s’agit, la valeur est le numéro tel que l’organisme le donne, sans espace. La version 0.1 ne contrôle pas la forme des numéros : chaque schéma dira la sienne quand elle aura été vérifiée auprès de l’organisme qui l’attribue.",
+  "version": "0.1",
+  "schemes": [
+    { "scheme": "dz:nin", "for": "person", "fr": "Numéro d’identification national", "ar": "رقم التعريف الوطني" },
+    { "scheme": "dz:nss", "for": "person", "fr": "Numéro de sécurité sociale", "ar": "رقم الضمان الاجتماعي" },
+    { "scheme": "dz:nif", "for": "organisation", "fr": "Numéro d’identification fiscale", "ar": "رقم التعريف الجبائي" },
+    { "scheme": "dz:nis", "for": "organisation", "fr": "Numéro d’identification statistique", "ar": "رقم التعريف الإحصائي" },
+    { "scheme": "dz:rc", "for": "organisation", "fr": "Numéro du registre du commerce", "ar": "رقم السجل التجاري" },
+    { "scheme": "dz:cnas-employer", "for": "organisation", "fr": "Numéro d’employeur à la CNAS", "ar": "رقم المستخدم لدى الصندوق الوطني للتأمينات الاجتماعية" },
+    { "scheme": "domain", "for": "organisation", "fr": "Nom de domaine tenu par l’organisation", "ar": "اسم النطاق الذي تملكه المنظمة" }
+  ]
+}

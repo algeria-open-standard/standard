@@ -1,0 +1,53 @@
+{
+  "about": "The trust store of the examples: the keys a verifier was given by their holders. TEST KEYS.",
+  "keys": [
+    {
+      "kid": "4qe6Wy0zTEqxNYqpYDzp98xeRibXYfR_NvdCpnbyVHI",
+      "jwk": {
+        "kty": "OKP",
+        "crv": "Ed25519",
+        "x": "LcPhd92nFUPwgoNA2h1ob4OTczxJ3jZ32jnrrRQIy7E"
+      },
+      "holder": {
+        "name": "SARL Atlas Conseil",
+        "country": "DZ",
+        "identifiers": [
+          {
+            "scheme": "dz:nif",
+            "value": "000016000000001"
+          },
+          {
+            "scheme": "dz:rc",
+            "value": "16/00-0000001B23"
+          }
+        ]
+      },
+      "source": "direct",
+      "validFrom": "2026-01-01T00:00:00Z"
+    },
+    {
+      "kid": "NAZRWh3mvzqjvDMiuvTDBkspuBLzjAtSzsS9av1peVY",
+      "jwk": {
+        "kty": "OKP",
+        "crv": "Ed25519",
+        "x": "pnT_L78WNn8PpMUkp_6WT9i83l3eByQWNNTp2OCzsNY"
+      },
+      "holder": {
+        "name": "EURL Numidia Tech",
+        "country": "DZ",
+        "identifiers": [
+          {
+            "scheme": "dz:nif",
+            "value": "000031000000002"
+          },
+          {
+            "scheme": "dz:rc",
+            "value": "31/00-0000002B26"
+          }
+        ]
+      },
+      "source": "direct",
+      "validFrom": "2026-01-01T00:00:00Z"
+    }
+  ]
+}

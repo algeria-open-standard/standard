@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:aos:format:hr:0.1:payroll",
+  "title": "hr.payroll 0.1 : les bulletins de paie d’une année",
+  "type": "object",
+  "required": ["type", "version", "year", "currency", "payslips"],
+  "additionalProperties": false,
+  "properties": {
+    "type": { "const": "hr.payroll" },
+    "version": { "const": "0.1" },
+    "year": { "type": "integer", "minimum": 1962, "maximum": 2200 },
+    "currency": { "type": "string", "pattern": "^[A-Z]{3}$", "description": "ISO 4217 ; DZD pour le dinar" },
+    "payslips": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["period", "lines", "totals"],
+        "additionalProperties": false,
+        "properties": {
+          "period": { "type": "string", "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])$" },
+          "paidOn": { "$ref": "#/$defs/date" },
+          "daysWorked": { "type": "number", "minimum": 0 },
+          "hoursWorked": { "type": "number", "minimum": 0 },
+          "lines": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["code", "label", "kind", "amount"],
+              "additionalProperties": false,
+              "properties": {
+                "code": { "type": "string", "pattern": "^([a-z][a-z0-9-]*|x-[a-z0-9-]+)$", "description": "Un code de vocab/pay-elements.json, ou x-… pour une rubrique propre à l’émetteur" },
+                "label": { "type": "string", "minLength": 1, "description": "Le libellé tel qu’il figure sur le bulletin" },
+                "kind": { "enum": ["earning", "deduction", "employer-charge", "information"] },
+                "base": { "$ref": "#/$defs/amount" },
+                "rate": { "type": "string", "pattern": "^[0-9]+(\\.[0-9]+)?$", "description": "En pour cent, en décimal : \"9\" pour 9 %" },
+                "quantity": { "type": "string", "pattern": "^-?[0-9]+(\\.[0-9]+)?$" },
+                "amount": { "$ref": "#/$defs/amount" },
+                "contributory": { "type": "boolean", "description": "Entre dans l’assiette des cotisations" },
+                "taxable": { "type": "boolean", "description": "Entre dans le revenu imposable" }
+              }
+            }
+          },
+          "totals": {
+            "type": "object",
+            "required": ["gross", "net"],
+            "additionalProperties": false,
+            "properties": {
+              "gross": { "$ref": "#/$defs/amount" },
+              "contributoryBase": { "$ref": "#/$defs/amount" },
+              "employeeContributions": { "$ref": "#/$defs/amount" },
+              "taxableBase": { "$ref": "#/$defs/amount" },
+              "incomeTax": { "$ref": "#/$defs/amount" },
+              "net": { "$ref": "#/$defs/amount" },
+              "employerContributions": { "$ref": "#/$defs/amount" }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "date": { "type": "string", "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$" },
+    "amount": { "type": "string", "pattern": "^-?[0-9]+\\.[0-9]{2}$", "description": "Un montant en décimal, deux chiffres après le point, jamais un nombre flottant : \"45000.00\"" }
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:aos:spec:0.1:seals",
+  "title": "AOS 0.1, cachets d’un segment (seals.json) : sérialisation JSON générale de JWS (RFC 7515), charge utile détachée",
+  "type": "object",
+  "required": ["signatures"],
+  "additionalProperties": false,
+  "properties": {
+    "signatures": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["protected", "signature"],
+        "additionalProperties": false,
+        "properties": {
+          "protected": { "type": "string", "pattern": "^[A-Za-z0-9_-]+$" },
+          "signature": { "type": "string", "pattern": "^[A-Za-z0-9_-]+$" },
+          "header": {
+            "type": "object",
+            "description": "Non protégé : preuves ajoutées après l’apposition du cachet (horodatage, reçu de registre). Rien ici n’est couvert par le cachet.",
+            "properties": {
+              "aosEvidence": {
+                "type": "array",
+                "items": { "type": "object", "required": ["type"], "properties": { "type": { "type": "string" } } }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "protectedHeader": {
+      "title": "En-tête protégé, une fois décodé",
+      "type": "object",
+      "required": ["alg", "typ", "kid", "jwk", "aosKind", "aosRole"],
+      "properties": {
+        "alg": { "enum": ["EdDSA", "ES256"] },
+        "typ": { "const": "aos-seal+jws" },
+        "kid": { "type": "string", "description": "Empreinte de la clé publique, RFC 7638, SHA-256, base64url" },
+        "jwk": { "type": "object", "required": ["kty", "crv", "x"], "properties": { "kty": { "enum": ["OKP", "EC"] }, "crv": { "enum": ["Ed25519", "P-256"] }, "x": { "type": "string" }, "y": { "type": "string" }, "d": false }, "description": "La clé publique, et elle seule : le membre d, qui porte la clé privée, est interdit" },
+        "x5c": { "type": "array", "items": { "type": "string" }, "description": "Chaîne de certificats X.509 (RFC 7515, 4.1.6) quand la clé est certifiée par un prestataire" },
+        "aosKind": { "enum": ["seal", "signature"], "description": "seal : cachet d’une personne morale ; signature : signature d’une personne physique" },
+        "aosRole": { "type": "string", "description": "issuer pour l’émetteur du segment" }
+      }
+    }
+  }
+}

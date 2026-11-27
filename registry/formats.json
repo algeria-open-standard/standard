@@ -1,0 +1,15 @@
+{
+  "about": "Les formats du standard. Un format entre ici quand sa proposition est acceptée ; son état dit ce qu’on peut en attendre : draft (peut changer sans préavis), candidate (figé sauf défaut, cherche des mises en œuvre), stable (ne change plus que de façon compatible), retired.",
+  "formats": [
+    {
+      "id": "hr",
+      "extension": ".hr",
+      "mediaType": "application/vnd.aos.hr+zip",
+      "title": { "fr": "Ressources humaines et paie", "ar": "الموارد البشرية والأجور" },
+      "version": "0.1",
+      "status": "draft",
+      "path": "formats/hr",
+      "profiles": ["employee-file"]
+    }
+  ]
+}

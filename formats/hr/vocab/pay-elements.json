@@ -1,0 +1,29 @@
+{
+  "about": "Codes des rubriques de paie du format .hr 0.1. Un code dit ce qu’est une ligne de bulletin, quel que soit le libellé que lui donne le logiciel ou l’entreprise. Il ne dit ni taux ni règle de calcul : ceux-ci viennent de la loi et changent avec elle. Une rubrique qui n’a pas de code ici s’écrit x-<éditeur>-<nom> ; proposer son ajout est une contribution ordinaire.",
+  "version": "0.1",
+  "elements": [
+    { "code": "base-salary", "kind": "earning", "fr": "Salaire de base", "ar": "الأجر القاعدي" },
+    { "code": "seniority-allowance", "kind": "earning", "fr": "Indemnité d’expérience professionnelle", "ar": "تعويض الخبرة المهنية" },
+    { "code": "overtime", "kind": "earning", "fr": "Heures supplémentaires", "ar": "الساعات الإضافية" },
+    { "code": "shift-allowance", "kind": "earning", "fr": "Indemnité de travail posté", "ar": "تعويض العمل التناوبي" },
+    { "code": "nuisance-allowance", "kind": "earning", "fr": "Indemnité de nuisance", "ar": "تعويض الضرر" },
+    { "code": "on-call-allowance", "kind": "earning", "fr": "Indemnité d’astreinte", "ar": "تعويض المداومة" },
+    { "code": "responsibility-allowance", "kind": "earning", "fr": "Indemnité de responsabilité", "ar": "تعويض المسؤولية" },
+    { "code": "performance-bonus", "kind": "earning", "fr": "Prime de rendement", "ar": "منحة المردودية" },
+    { "code": "meal-allowance", "kind": "earning", "fr": "Prime de panier", "ar": "منحة السلة" },
+    { "code": "transport-allowance", "kind": "earning", "fr": "Indemnité de transport", "ar": "تعويض النقل" },
+    { "code": "zone-allowance", "kind": "earning", "fr": "Indemnité de zone", "ar": "تعويض المنطقة" },
+    { "code": "single-salary-allowance", "kind": "earning", "fr": "Indemnité de salaire unique", "ar": "منحة الأجر الوحيد" },
+    { "code": "family-allowance", "kind": "earning", "fr": "Allocations familiales", "ar": "المنح العائلية" },
+    { "code": "paid-leave", "kind": "earning", "fr": "Indemnité de congé payé", "ar": "تعويض العطلة المدفوعة الأجر" },
+    { "code": "other-earning", "kind": "earning", "fr": "Autre gain", "ar": "كسب آخر" },
+    { "code": "social-security-employee", "kind": "deduction", "fr": "Cotisation de sécurité sociale, part du salarié", "ar": "اشتراك الضمان الاجتماعي، حصة العامل" },
+    { "code": "income-tax", "kind": "deduction", "fr": "Impôt sur le revenu global (IRG)", "ar": "الضريبة على الدخل الإجمالي" },
+    { "code": "absence-deduction", "kind": "deduction", "fr": "Retenue pour absence", "ar": "اقتطاع الغياب" },
+    { "code": "advance-repayment", "kind": "deduction", "fr": "Remboursement d’avance", "ar": "تسديد تسبيق" },
+    { "code": "loan-repayment", "kind": "deduction", "fr": "Remboursement de prêt", "ar": "تسديد قرض" },
+    { "code": "other-deduction", "kind": "deduction", "fr": "Autre retenue", "ar": "اقتطاع آخر" },
+    { "code": "social-security-employer", "kind": "employer-charge", "fr": "Cotisation de sécurité sociale, part de l’employeur", "ar": "اشتراك الضمان الاجتماعي، حصة المستخدم" },
+    { "code": "other-employer-charge", "kind": "employer-charge", "fr": "Autre charge de l’employeur", "ar": "عبء آخر على المستخدم" }
+  ]
+}

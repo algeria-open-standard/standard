@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:aos:format:hr:0.1:leave",
+  "title": "hr.leave 0.1 : le congé annuel, à une date",
+  "description": "La version 0.1 ne porte que le congé annuel payé. Elle ne porte aucune absence pour maladie ni aucune autre donnée de santé.",
+  "type": "object",
+  "required": ["type", "version", "asOf", "annual"],
+  "additionalProperties": false,
+  "properties": {
+    "type": { "const": "hr.leave" },
+    "version": { "const": "0.1" },
+    "asOf": { "$ref": "#/$defs/date" },
+    "annual": {
+      "type": "object",
+      "required": ["entitledDays", "takenDays", "balanceDays"],
+      "additionalProperties": false,
+      "properties": {
+        "referencePeriod": {
+          "type": "object",
+          "required": ["from", "to"],
+          "additionalProperties": false,
+          "properties": { "from": { "$ref": "#/$defs/date" }, "to": { "$ref": "#/$defs/date" } }
+        },
+        "entitledDays": { "type": "number", "minimum": 0 },
+        "takenDays": { "type": "number", "minimum": 0 },
+        "balanceDays": { "type": "number" }
+      }
+    },
+    "taken": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["from", "to", "days"],
+        "additionalProperties": false,
+        "properties": { "from": { "$ref": "#/$defs/date" }, "to": { "$ref": "#/$defs/date" }, "days": { "type": "number", "exclusiveMinimum": 0 } }
+      }
+    }
+  },
+  "$defs": { "date": { "type": "string", "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$" } }
+}

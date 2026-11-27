@@ -1,0 +1,21 @@
+{
+  "name": "aos-reference",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Reference implementation of the Algeria Open Standard: the container, the seals, the chain, the format .hr. It exists to prove the specification and to give test vectors, not to be the fastest.",
+  "type": "module",
+  "engines": {
+    "node": ">=22.2"
+  },
+  "bin": {
+    "aos": "src/cli.mjs"
+  },
+  "scripts": {
+    "test": "node --test \"test/*.test.mjs\"",
+    "examples": "node ../../formats/hr/examples/build.mjs"
+  },
+  "devDependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1"
+  }
+}

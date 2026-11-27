@@ -1,0 +1,5 @@
+* text=auto eol=lf
+# sealed files and what they are checked against must not be rewritten by git
+*.hr binary
+*.pdf binary
+*.png binary

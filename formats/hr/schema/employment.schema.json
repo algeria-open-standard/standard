@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:aos:format:hr:0.1:employment",
+  "title": "hr.employment 0.1 : la relation de travail chez l’émetteur du segment",
+  "type": "object",
+  "required": ["type", "version", "employer", "hiredOn", "leftOn", "contracts"],
+  "additionalProperties": false,
+  "properties": {
+    "type": { "const": "hr.employment" },
+    "version": { "const": "0.1" },
+    "employer": {
+      "type": "object",
+      "required": ["name", "identifiers"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "legalForm": { "type": "string", "description": "SARL, EURL, SPA, SNC…" },
+        "identifiers": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/identifier" } },
+        "address": { "type": "string" },
+        "activity": { "type": "string" }
+      }
+    },
+    "employeeNumber": { "type": "string", "description": "Matricule chez cet employeur" },
+    "hiredOn": { "$ref": "#/$defs/date" },
+    "leftOn": { "oneOf": [{ "$ref": "#/$defs/date" }, { "type": "null" }], "description": "null tant que la personne est en poste" },
+    "leavingReason": {
+      "enum": ["resignation", "end-of-term", "dismissal", "redundancy", "retirement", "mutual-agreement", "death", "other"],
+      "description": "Facultatif. À ne porter que si la personne le demande : le motif du départ ne figure pas sur un certificat de travail."
+    },
+    "contracts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["kind", "from", "to", "position"],
+        "additionalProperties": false,
+        "properties": {
+          "kind": { "enum": ["cdi", "cdd", "apprenticeship", "other"] },
+          "from": { "$ref": "#/$defs/date" },
+          "to": { "oneOf": [{ "$ref": "#/$defs/date" }, { "type": "null" }] },
+          "position": { "type": "string", "minLength": 1 },
+          "department": { "type": "string" },
+          "workingTime": {
+            "type": "object",
+            "required": ["regime"],
+            "additionalProperties": false,
+            "properties": { "regime": { "enum": ["full-time", "part-time"] }, "weeklyHours": { "type": "number", "exclusiveMinimum": 0 } }
+          },
+          "trialPeriodDays": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "positions": {
+      "type": "array",
+      "description": "Postes occupés et périodes correspondantes, dans l’ordre",
+      "items": {
+        "type": "object",
+        "required": ["from", "to", "title"],
+        "additionalProperties": false,
+        "properties": {
+          "from": { "$ref": "#/$defs/date" },
+          "to": { "oneOf": [{ "$ref": "#/$defs/date" }, { "type": "null" }] },
+          "title": { "type": "string", "minLength": 1 },
+          "department": { "type": "string" },
+          "classification": { "type": "string", "description": "Catégorie, échelon ou niveau selon la grille de l’employeur" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "date": { "type": "string", "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$" },
+    "identifier": {
+      "type": "object",
+      "required": ["scheme", "value"],
+      "additionalProperties": false,
+      "properties": { "scheme": { "type": "string" }, "value": { "type": "string", "minLength": 1, "maxLength": 64 } }
+    }
+  }
+}

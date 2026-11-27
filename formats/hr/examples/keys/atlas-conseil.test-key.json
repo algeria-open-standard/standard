@@ -1,0 +1,7 @@
+{
+  "warning": "TEST KEY, published on purpose. Never use it for anything real.",
+  "crv": "Ed25519",
+  "d": "F0d_10zYXE3y_R7hZIbLykewRSE9tgAr3BvpXH3GXgI",
+  "x": "LcPhd92nFUPwgoNA2h1ob4OTczxJ3jZ32jnrrRQIy7E",
+  "kty": "OKP"
+}
